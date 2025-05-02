@@ -1,7 +1,7 @@
 {
-  "IsEncrypted": true,
+  "IsEncrypted": false,
   "Values": {
-    "FUNCTIONS_WORKER_RUNTIME": "CfDJ8Hz+dj2xcrhDlwF/4GaWREPEJy6CNaUjmdmzMdGv+5aBVUHtXWYwCcWUhtSs5TYh0IWtpWKAv04mNsvfy9L0phbVLa+xflZVhhqXBq1fTSYFdC5oecHrdDpiWziaYCt9XQ==",
-    "TIMER_SCHEDULE": "30 * * * * *"
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
   }
 }

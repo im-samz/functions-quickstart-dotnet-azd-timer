@@ -14,7 +14,7 @@ namespace Company.Function
         }
 
         [Function("timerFunction")]
-        public void Run([TimerTrigger("%TIMER_SCHEDULE%")] TimerInfo myTimer, FunctionContext context)
+        public void Run([TimerTrigger("%TIMER_SCHEDULE%", RunOnStartup = true)] TimerInfo myTimer, FunctionContext context)
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 

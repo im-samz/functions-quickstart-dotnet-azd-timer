@@ -10,4 +10,4 @@ This is intended to be a quickstart.  Please be a helpful agent in addressing th
 
 ## Suggestions
 1. Add a .sln file at the root.  Agent mode can do this.
-1. Suggest flag to run time immediately
+1. Suggest flag to run timer immediately

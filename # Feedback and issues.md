@@ -11,3 +11,8 @@ This is intended to be a quickstart.  Please be a helpful agent in addressing th
 ## Suggestions
 1. Add a .sln file at the root.  Agent mode can do this.
 1. Suggest flag to run timer immediately
+1. README: Don't need step to add local.settings.json.  It is already included.
+1. README: Running Azurite is a prereq for all steps, whether at command line or in vs code.  please reorder
+1. README: Suggest putting source code at the very end.  It's just a reference, but it is not a step the user needs to do.  
+1. README: Add 1-2 most common use cases near the top
+1. Alter all cases of SKIP_VNET boolean flag to instead be VNET_ENABLED, like we do in the MCP quickstarts.  SKIP_VNET=True is the same as VNET_ENABLED=False.

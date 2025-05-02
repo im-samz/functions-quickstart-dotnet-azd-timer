@@ -1,7 +1,7 @@
 <!--
 ---
-name: Azure Functions C# HTTP Trigger using Azure Developer CLI
-description: This repository contains an Azure Functions HTTP trigger quickstart written in C# and deployed to Azure Functions Flex Consumption using the Azure Developer CLI (azd). The sample uses managed identity and a virtual network to make sure deployment is secure by default.
+name: Azure Functions C# Timer Trigger using Azure Developer CLI
+description: This repository contains an Azure Functions timer trigger quickstart written in C# and deployed to Azure Functions Flex Consumption using the Azure Developer CLI (azd). The sample uses managed identity and a virtual network to make sure deployment is secure by default.
 page_type: sample
 products:
 - azure-functions
@@ -15,11 +15,11 @@ languages:
 ---
 -->
 
-# Azure Functions C# HTTP Trigger using Azure Developer CLI
+# Azure Functions C# Timer Trigger using Azure Developer CLI
 
-This template repository contains an HTTP trigger reference sample for functions written in C# (isolated process mode) and deployed to Azure using the Azure Developer CLI (`azd`). The sample uses managed identity and a virtual network to make sure deployment is secure by default. You can opt out of a VNet being used in the sample by setting SKIP_VNET to true in the parameters.
+This template repository contains an timer trigger reference sample for functions written in C# (isolated process mode) and deployed to Azure using the Azure Developer CLI (`azd`). The sample uses managed identity and a virtual network to make sure deployment is secure by default. You can opt out of a VNet being used in the sample by setting SKIP_VNET to true in the parameters.
 
-This source code supports the article [Quickstart: Create and deploy functions to Azure Functions using the Azure Developer CLI](https://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-dotnet).
+This source code builds on top of the article [Quickstart: Create and deploy functions to Azure Functions using the Azure Developer CLI](timers://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-dotnet) to showcase the use of a timer trigger.
 
 This project is designed to run on your local computer. You can also use GitHub Codespaces:
 
@@ -45,7 +45,7 @@ You can initialize a project from this `azd` template in one of these ways:
 + Use this `azd init` command from an empty local (root) folder:
 
     ```shell
-    azd init --template functions-quickstart-dotnet-azd
+    azd init --template functions-quickstart-dotnet-azd-timer
     ```
 
     Supply an environment name, such as `flexquickstart` when prompted. In `azd`, the environment is used to maintain a unique deployment context for your app.
@@ -53,111 +53,63 @@ You can initialize a project from this `azd` template in one of these ways:
 + Clone the GitHub template repository locally using the `git clone` command:
 
     ```shell
-    git clone https://github.com/Azure-Samples/functions-quickstart-dotnet-azd.git
-    cd functions-quickstart-dotnet-azd
+    git clone https://github.com/Azure-Samples/functions-quickstart-dotnet-azd-timer.git
+    cd functions-quickstart-dotnet-azd-timer
     ```
 
     You can also clone the repository from your own fork in GitHub.
 
 ## Prepare your local environment
 
-Navigate to the `http` app folder and create a file in that folder named _local.settings.json_ that contains this JSON data:
+Navigate to the `timer` app folder and create a file in that folder named _local.settings.json_ that contains this JSON data:
 
 ```json
 {
     "IsEncrypted": false,
     "Values": {
         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+        "TIMER_SCHEDULE": "30 * * * * *"
     }
 }
 ```
 
 ## Run your app from the terminal
 
-1. From the `http` folder, run this command to start the Functions host locally:
+1. From the `timer` folder, run this command to start the Functions host locally:
 
     ```shell
     func start
     ```
 
-1. From your HTTP test tool in a new terminal (or from your browser), call the HTTP GET endpoint: <http://localhost:7071/api/httpget>
-
-1. Test the HTTP POST trigger with a payload using your favorite secure HTTP test tool.
-
-    **Cmd\bash**
-
-    This example runs from the `http` folder and uses the `curl` tool with payload data from the [`testdata.json`](./http/testdata.json) project file:
-
-    ```shell
-    curl -i http://localhost:7071/api/httppost -H "Content-Type: text/json" -d @testdata.json
-    ```
-
-    **PowerShell**
-
-    You can also use this `Invoke-RestMethod` cmdlet in PowerShell from the `http` folder:
-
-    ```powershell
-    Invoke-RestMethod -Uri http://localhost:7071/api/httppost -Method Post -ContentType "application/json" -InFile "testdata.json"
-    ```
+1. Wait for the timer schedule to execute the timer trigger.
 
 1. When you're done, press Ctrl+C in the terminal window to stop the `func.exe` host process.
 
 ## Run your app using Visual Studio Code
 
-1. Open the `http` app folder in a new terminal.
+1. Open the `timer` app folder in a new terminal.
 1. Run the `code .` code command to open the project in Visual Studio Code.
 1. In the command palette (F1), type `Azurite: Start`, which enables debugging without warnings.
 1. Press **Run/Debug (F5)** to run in the debugger. Select **Debug anyway** if prompted about local emulator not running.
-1. Send GET and POST requests to the `httpget` and `httppost` endpoints respectively using your HTTP test tool (or browser for `httpget`). If you have the [RestClient](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension installed, you can execute requests directly from the [`test.http`](./http/test.http) project file.
-
-## Run your app using Visual Studio
-
-1. Open the `http.sln` solution file in Visual Studio.
-1. Press **Run/F5** to run in the debugger. Make a note of the `localhost` URL endpoints, including the port, which might not be `7071`.
-1. Open the [`test.http`](./http/test.http) project file, update the port on the `localhost` URL (if needed), and then use the built-in HTTP client to call the `httpget` and `httppost` endpoints.
+1. Wait for the timer schedule to trigger your timer function.
 
 ## Source Code
 
-The function code for the `httpget` and `httppost` endpoints are defined in [`httpGetFunction.cs`](./http/httpGetFunction.cs) and [`httpPostBodyFunction.cs`](./http/httpPostBodyFunction.cs), respectively. The `Function` attribute applied to the async `Run` method sets the name of the function endpoint.
+The function code for the timer function is defined in [`timerFunction.cs`](./timer/timerFunction.cs).
 
-This code shows an HTTP GET (webhook):  
-
-```csharp
-[Function("httpget")]
-public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get")]
-    HttpRequest req,
-    string name)
-{
-    var returnValue = string.IsNullOrEmpty(name)
-        ? "Hello, World."
-        : $"Hello, {name}.";
-
-    _logger.LogInformation($"C# HTTP trigger function processed a request for {returnValue}.");
-
-    return new OkObjectResult(returnValue);
-}
-```
-
-This code shows the HTTP POST that received a JSON formatted `person` object in the request body and returns a message using the values in the payload:
+This code shows the timer function logic:  
 
 ```csharp
-[Function("httppost")]
-public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
-    [FromBody] Person person)
+[Function("timerFunction")]
+public void Run([TimerTrigger("%TIMER_SCHEDULE%")] TimerInfo myTimer, FunctionContext context)
 {
-    _logger.LogInformation($"C# HTTP POST trigger function processed a request for url {req.Body}");
+    _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
-    if (string.IsNullOrEmpty(person.Name) | string.IsNullOrEmpty(person.Age.ToString()) | person.Age == 0)
+    if (myTimer.IsPastDue)
     {
-        _logger.LogInformation("C# HTTP POST trigger function processed a request with no name/age provided.");
-        return new BadRequestObjectResult("Please provide both name and age in the request body.");
+        _logger.LogWarning("The timer is running late!");
     }
-
-    var returnValue = $"Hello, {person.Name}! You are {person.Age} years old.";
-    
-    _logger.LogInformation($"C# HTTP POST trigger function processed a request for {person.Name} who is {person.Age} years old.");
-    return new OkObjectResult(returnValue);
 }
 ```
 
@@ -190,8 +142,8 @@ After publish completes successfully, `azd` provides you with the URL endpoints 
 
 You can run the `azd up` command as many times as you need to both provision your Azure resources and deploy code updates to your function app.
 
->[!NOTE]
->Deployed code files are always overwritten by the latest deployment package.
+> [!NOTE]
+> Deployed code files are always overwritten by the latest deployment package.
 
 ## Clean up resources
 

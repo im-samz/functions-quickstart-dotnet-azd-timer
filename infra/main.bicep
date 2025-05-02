@@ -14,7 +14,7 @@ param environmentName string
   }
 })
 param location string
-param skipVnet bool = false
+param vnetEnabled bool = true
 param appServiceName string = ''
 param appUserAssignedIdentityName string = ''
 param applicationInsightsName string = ''
@@ -81,7 +81,7 @@ module app './app/app.bicep' = {
     identityClientId: appUserAssignedIdentity.outputs.identityClientId
     appSettings: {
     }
-    virtualNetworkSubnetId: skipVnet ? '' : serviceVirtualNetwork.outputs.appSubnetID
+    virtualNetworkSubnetId: !vnetEnabled ? '' : serviceVirtualNetwork.outputs.appSubnetID
   }
 }
 
@@ -94,8 +94,8 @@ module storage './core/storage/storage-account.bicep' = {
     location: location
     tags: tags
     containers: [{name: deploymentStorageContainerName}]
-    publicNetworkAccess: skipVnet ? 'Enabled' : 'Disabled'
-    networkAcls: skipVnet ? {} : {
+    publicNetworkAccess: !vnetEnabled ? 'Enabled' : 'Disabled'
+    networkAcls: !vnetEnabled ? {} : {
       defaultAction: 'Deny'
     }
   }
@@ -115,7 +115,7 @@ module storageRoleAssignmentApp 'app/storage-Access.bicep' = {
 }
 
 // Virtual Network & private endpoint to blob storage
-module serviceVirtualNetwork 'app/vnet.bicep' =  if (!skipVnet) {
+module serviceVirtualNetwork 'app/vnet.bicep' =  if (vnetEnabled) {
   name: 'serviceVirtualNetwork'
   scope: rg
   params: {
@@ -125,14 +125,14 @@ module serviceVirtualNetwork 'app/vnet.bicep' =  if (!skipVnet) {
   }
 }
 
-module storagePrivateEndpoint 'app/storage-PrivateEndpoint.bicep' = if (!skipVnet) {
+module storagePrivateEndpoint 'app/storage-PrivateEndpoint.bicep' = if (vnetEnabled) {
   name: 'servicePrivateEndpoint'
   scope: rg
   params: {
     location: location
     tags: tags
     virtualNetworkName: !empty(vNetName) ? vNetName : '${abbrs.networkVirtualNetworks}${resourceToken}'
-    subnetName: skipVnet ? '' : serviceVirtualNetwork.outputs.peSubnetName
+    subnetName: !vnetEnabled ? '' : serviceVirtualNetwork.outputs.peSubnetName
     resourceName: storage.outputs.name
   }
 }

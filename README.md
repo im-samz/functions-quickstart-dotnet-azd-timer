@@ -17,18 +17,24 @@ languages:
 
 # Azure Functions C# Timer Trigger using Azure Developer CLI
 
-This template repository contains an timer trigger reference sample for functions written in C# (isolated process mode) and deployed to Azure using the Azure Developer CLI (`azd`). The sample uses managed identity and a virtual network to make sure deployment is secure by default. You can opt out of a VNet being used in the sample by setting SKIP_VNET to true in the parameters.
+This template repository contains an timer trigger reference sample for functions written in C# (isolated process mode) and deployed to Azure using the Azure Developer CLI (`azd`). The sample uses managed identity and a virtual network to make sure deployment is secure by default. You can opt out of a VNet being used in the sample by setting VNET_ENABLED to false in the parameters.
 
-This source code builds on top of the article [Quickstart: Create and deploy functions to Azure Functions using the Azure Developer CLI](timers://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-dotnet) to showcase the use of a timer trigger.
+## Common Use Cases for Timer Triggers
+
+- **Regular data processing**: Schedule batch processing jobs to run at specific intervals
+- **Maintenance tasks**: Perform periodic cleanup or maintenance operations on your data
+- **Scheduled notifications**: Send automated reports or alerts on a fixed schedule
+- **Integration polling**: Regularly check for updates in external systems that don't support push notifications
 
 This project is designed to run on your local computer. You can also use GitHub Codespaces:
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=836901178)
 
-This codespace is already configured with the required tools to complete this tutorial using either `azd` or Visual Studio Code. If you're working a codespace, skip down to [Prepare your local environment](#prepare-your-local-environment).
+This codespace is already configured with the required tools to complete this tutorial using either `azd` or Visual Studio Code. If you're working a codespace, skip down to [Run your app section](#run-your-app-from-the-terminal).
 
 ## Prerequisites
 
++ [Azure Storage Emulator (Azurite)](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) - Required for local development with Azure Functions
 + [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 + [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?pivots=programming-language-csharp#install-the-azure-functions-core-tools)
 + To use Visual Studio to run and debug locally:
@@ -59,59 +65,30 @@ You can initialize a project from this `azd` template in one of these ways:
 
     You can also clone the repository from your own fork in GitHub.
 
-## Prepare your local environment
-
-Navigate to the `timer` app folder and create a file in that folder named _local.settings.json_ that contains this JSON data:
-
-```json
-{
-    "IsEncrypted": false,
-    "Values": {
-        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-        "TIMER_SCHEDULE": "30 * * * * *"
-    }
-}
-```
-
 ## Run your app from the terminal
 
-1. From the `timer` folder, run this command to start the Functions host locally:
+1. Start Azurite storage emulator in a separate terminal window:
+   ```shell
+   azurite
+   ```
+
+2. From the `timer` folder, run this command to start the Functions host locally:
 
     ```shell
     func start
     ```
 
-1. Wait for the timer schedule to execute the timer trigger.
+3. Wait for the timer schedule to execute the timer trigger.
 
-1. When you're done, press Ctrl+C in the terminal window to stop the `func.exe` host process.
+4. When you're done, press Ctrl+C in the terminal window to stop the `func.exe` host process.
 
 ## Run your app using Visual Studio Code
 
 1. Open the `timer` app folder in a new terminal.
-1. Run the `code .` code command to open the project in Visual Studio Code.
-1. In the command palette (F1), type `Azurite: Start`, which enables debugging without warnings.
-1. Press **Run/Debug (F5)** to run in the debugger. Select **Debug anyway** if prompted about local emulator not running.
-1. Wait for the timer schedule to trigger your timer function.
-
-## Source Code
-
-The function code for the timer function is defined in [`timerFunction.cs`](./timer/timerFunction.cs).
-
-This code shows the timer function logic:  
-
-```csharp
-[Function("timerFunction")]
-public void Run([TimerTrigger("%TIMER_SCHEDULE%")] TimerInfo myTimer, FunctionContext context)
-{
-    _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-
-    if (myTimer.IsPastDue)
-    {
-        _logger.LogWarning("The timer is running late!");
-    }
-}
-```
+2. Run the `code .` code command to open the project in Visual Studio Code.
+3. In the command palette (F1), type `Azurite: Start`, which enables debugging without warnings.
+4. Press **Run/Debug (F5)** to run in the debugger. Select **Debug anyway** if prompted about local emulator not running.
+5. Wait for the timer schedule to trigger your timer function.
 
 ## Deploy to Azure
 
@@ -121,10 +98,10 @@ Run this command to provision the function app, with any required Azure resource
 azd up
 ```
 
-Alternatively, you can opt-out of a VNet being used in the sample. To do so, use `azd env` to configure `SKIP_VNET` to `true` before running `azd up`:
+Alternatively, you can opt-out of a VNet being used in the sample. To do so, use `azd env` to configure `VNET_ENABLED` to `false` before running `azd up`:
 
 ```bash
-azd env set SKIP_VNET true
+azd env set VNET_ENABLED false
 azd up
 ```
 
@@ -152,3 +129,24 @@ When you're done working with your function app and related resources, you can u
 ```shell
 azd down
 ```
+
+## Source Code
+
+The function code for the timer function is defined in [`timerFunction.cs`](./timer/timerFunction.cs).
+
+This code shows the timer function logic:  
+
+```csharp
+[Function("timerFunction")]
+public void Run([TimerTrigger("%TIMER_SCHEDULE%", RunOnStartup = true)] TimerInfo myTimer, FunctionContext context)
+{
+    _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+
+    if (myTimer.IsPastDue)
+    {
+        _logger.LogWarning("The timer is running late!");
+    }
+}
+```
+
+Note that the `RunOnStartup = true` parameter makes the timer function execute immediately when the app starts, in addition to running on the defined schedule.

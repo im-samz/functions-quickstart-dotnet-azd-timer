@@ -44,32 +44,11 @@ This codespace is already configured with the required tools to complete this tu
   + [Visual Studio Code](https://code.visualstudio.com/)
   + [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
 
-## Initialize the local project
-
-You can initialize a project from this `azd` template in one of these ways:
-
-+ Use this `azd init` command from an empty local (root) folder:
-
-    ```shell
-    azd init --template functions-quickstart-dotnet-azd-timer
-    ```
-
-    Supply an environment name, such as `flexquickstart` when prompted. In `azd`, the environment is used to maintain a unique deployment context for your app.
-
-+ Clone the GitHub template repository locally using the `git clone` command:
-
-    ```shell
-    git clone https://github.com/Azure-Samples/functions-quickstart-dotnet-azd-timer.git
-    cd functions-quickstart-dotnet-azd-timer
-    ```
-
-    You can also clone the repository from your own fork in GitHub.
-
 ## Run your app from the terminal
 
 1. Start Azurite storage emulator in a separate terminal window:
    ```shell
-   azurite
+   docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 mcr.microsoft.com/azure-storage/azurite
    ```
 
 2. From the `timer` folder, run this command to start the Functions host locally:
@@ -104,16 +83,6 @@ Alternatively, you can opt-out of a VNet being used in the sample. To do so, use
 azd env set VNET_ENABLED false
 azd up
 ```
-
-You're prompted to supply these required deployment parameters:
-
-| Parameter | Description |
-| ---- | ---- |
-| _Environment name_ | An environment that's used to maintain a unique deployment context for your app. You won't be prompted if you created the local project using `azd init`.|
-| _Azure subscription_ | Subscription in which your resources are created.|
-| _Azure location_ | Azure region in which to create the resource group that contains the new Azure resources. Only regions that currently support the Flex Consumption plan are shown.|
-
-After publish completes successfully, `azd` provides you with the URL endpoints of your new functions, but without the function key values required to access the endpoints. To learn how to obtain these same endpoints along with the required function keys, see [Invoke the function on Azure](https://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-dotnet#invoke-the-function-on-azure) in the companion article [Quickstart: Create and deploy functions to Azure Functions using the Azure Developer CLI](https://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-dotnet).
 
 ## Redeploy your code
 

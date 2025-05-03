@@ -132,13 +132,26 @@ azd down
 
 ## Source Code
 
-The function code for the timer function is defined in [`timerFunction.cs`](./timer/timerFunction.cs).
+The function code for the timer trigger is defined in [`timerFunction.cs`](./timer/timerFunction.cs).
 
-This code shows the timer function logic:  
+This code shows the timer function implementation:  
 
 ```csharp
+/// <summary>
+/// Timer-triggered function that executes on a schedule defined by TIMER_SCHEDULE app setting.
+/// </summary>
+/// <param name="myTimer">Timer information including schedule status</param>
+/// <param name="context">Function execution context</param>
+/// <remarks>
+/// The RunOnStartup=true parameter is useful for development and testing as it triggers
+/// the function immediately when the host starts, but should typically be set to false
+/// in production to avoid unexpected executions during deployments or restarts.
+/// </remarks>
 [Function("timerFunction")]
-public void Run([TimerTrigger("%TIMER_SCHEDULE%", RunOnStartup = true)] TimerInfo myTimer, FunctionContext context)
+public void Run(
+    [TimerTrigger("%TIMER_SCHEDULE%", RunOnStartup = true)] TimerInfo myTimer,
+    FunctionContext context
+)
 {
     _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
@@ -149,4 +162,24 @@ public void Run([TimerTrigger("%TIMER_SCHEDULE%", RunOnStartup = true)] TimerInf
 }
 ```
 
-Note that the `RunOnStartup = true` parameter makes the timer function execute immediately when the app starts, in addition to running on the defined schedule.
+### Key Features
+
+1. **Parameterized Schedule**: The function uses the `%TIMER_SCHEDULE%` environment variable to determine the execution schedule, making it configurable without code changes.
+
+2. **RunOnStartup Parameter**: Setting `RunOnStartup = true` makes the function execute immediately when the app starts, in addition to running on the defined schedule. This is useful for testing but can be disabled in production.
+
+3. **Past Due Detection**: The function checks if the timer is past due using the `myTimer.IsPastDue` property, allowing for appropriate handling of delayed executions.
+
+4. **Dependency Injection**: The function uses dependency injection to get a properly configured logger, following best practices for Azure Functions.
+
+5. **Isolated Process Mode**: This function runs in isolated process mode, which provides better isolation and more flexibility compared to in-process execution.
+
+### Configuration
+
+The timer schedule is configured through the `TIMER_SCHEDULE` application setting, which follows the NCRONTAB expression format. For example:
+
+- `0 */5 * * * *` - Run once every 5 minutes
+- `0 0 */1 * * *` - Run once every hour
+- `0 0 0 * * *` - Run once every day at midnight
+
+For more information on NCRONTAB expressions, see [Timer trigger for Azure Functions](https://learn.microsoft.com/azure/azure-functions/functions-bindings-timer).

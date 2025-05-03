@@ -27,7 +27,10 @@ namespace Company.Function
         /// in production to avoid unexpected executions during deployments or restarts.
         /// </remarks>
         [Function("timerFunction")]
-        public void Run([TimerTrigger("%TIMER_SCHEDULE%", RunOnStartup = true)] TimerInfo myTimer, FunctionContext context)
+        public void Run(
+            [TimerTrigger("%TIMER_SCHEDULE%", RunOnStartup = true)] TimerInfo myTimer,
+            FunctionContext context
+        )
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 

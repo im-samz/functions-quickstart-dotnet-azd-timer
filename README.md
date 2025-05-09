@@ -7,7 +7,7 @@ products:
 - azure-functions
 - azure
 - entra-id
-urlFragment: starter-http-trigger-csharp
+urlFragment: starter-timer-trigger-csharp
 languages:
 - csharp
 - bicep
@@ -19,6 +19,12 @@ languages:
 
 This template repository contains an timer trigger reference sample for functions written in C# (isolated process mode) and deployed to Azure using the Azure Developer CLI (`azd`). The sample uses managed identity and a virtual network to make sure deployment is secure by default. You can opt out of a VNet being used in the sample by setting VNET_ENABLED to false in the parameters.
 
+This project is designed to run on your local computer. You can also use GitHub Codespaces:
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=836901178)
+
+This codespace is already configured with the required tools to complete this tutorial using either `azd` or Visual Studio Code. If you're working a codespace, skip down to [Run your app section](#run-your-app-from-the-terminal).
+
 ## Common Use Cases for Timer Triggers
 
 - **Regular data processing**: Schedule batch processing jobs to run at specific intervals
@@ -26,27 +32,22 @@ This template repository contains an timer trigger reference sample for function
 - **Scheduled notifications**: Send automated reports or alerts on a fixed schedule
 - **Integration polling**: Regularly check for updates in external systems that don't support push notifications
 
-This project is designed to run on your local computer. You can also use GitHub Codespaces:
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=836901178)
-
-This codespace is already configured with the required tools to complete this tutorial using either `azd` or Visual Studio Code. If you're working a codespace, skip down to [Run your app section](#run-your-app-from-the-terminal).
-
 ## Prerequisites
 
-+ [Azure Storage Emulator (Azurite)](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) - Required for local development with Azure Functions
-+ [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-+ [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?pivots=programming-language-csharp#install-the-azure-functions-core-tools)
-+ To use Visual Studio to run and debug locally:
-  + [Visual Studio 2022](https://visualstudio.microsoft.com/vs/).
-  + Make sure to select the **Azure development** workload during installation.
-+ To use Visual Studio Code to run and debug locally:
-  + [Visual Studio Code](https://code.visualstudio.com/)
-  + [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
+- [Azure Storage Emulator (Azurite)](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) - Required for local development with Azure Functions
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?pivots=programming-language-csharp#install-the-azure-functions-core-tools)
+- To use Visual Studio to run and debug locally:
+  - [Visual Studio 2022](https://visualstudio.microsoft.com/vs/).
+  - Make sure to select the **Azure development** workload during installation.
+- To use Visual Studio Code to run and debug locally:
+  - [Visual Studio Code](https://code.visualstudio.com/)
+  - [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
 
 ## Run your app from the terminal
 
 1. Start Azurite storage emulator in a separate terminal window:
+
    ```shell
    docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 mcr.microsoft.com/azure-storage/azurite
    ```
@@ -130,6 +131,8 @@ public void Run(
     }
 }
 ```
+
+The isolated worker process C# library uses the [TimerTriggerAttribute](https://github.com/Azure/azure-functions-dotnet-worker/blob/main/extensions/Worker.Extensions.Timer/src/TimerTriggerAttribute.cs) from [Microsoft.Azure.Functions.Worker.Extensions.Timer](https://www.nuget.org/packages/Microsoft.Azure.Functions.Worker.Extensions.Timer) to define the function
 
 ### Key Features
 
